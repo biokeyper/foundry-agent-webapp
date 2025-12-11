@@ -115,7 +115,7 @@ if (-not (Test-Path $nodeModulesPath)) {
     }
 } else {
     # Verify node_modules is valid by checking if a key package exists
-    $msalPackage = Join-Path $nodeModulesPath "@azure" "msal-react"
+    $msalPackage = Join-Path (Join-Path $nodeModulesPath "@azure") "msal-react"
     if (-not (Test-Path $msalPackage)) {
         Write-Warning "node_modules appears incomplete or corrupted. Reinstalling..."
         Write-Host "This may take a few minutes..." -ForegroundColor Gray

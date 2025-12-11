@@ -12,7 +12,7 @@ export const BuiltWithBadge: React.FC<BuiltWithBadgeProps> = ({ className }) => 
   const handleClick = () => {
     // Link to Azure AI Foundry marketing page
     // In production, this could fetch user's Azure config and link to their specific project
-    window.open('https://azure.microsoft.com/en-us/products/ai-foundry', '_blank');
+    window.open('https://biokeyper.com/mootai', '_blank');
   };
 
   return (
@@ -26,10 +26,10 @@ export const BuiltWithBadge: React.FC<BuiltWithBadgeProps> = ({ className }) => 
         <AIFoundryLogo />
       </span>
       <Caption1Strong className={styles.description}>
-        Build & deploy AI agents with
+        Built in Kampala
       </Caption1Strong>
       <Caption1Strong className={styles.brand}>
-        Azure AI Foundry <ArrowRight16Filled aria-hidden={true} />
+       with Love ❤️ <ArrowRight16Filled aria-hidden={true} />
       </Caption1Strong>
     </button>
   );

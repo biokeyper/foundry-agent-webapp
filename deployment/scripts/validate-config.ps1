@@ -34,7 +34,7 @@ function Write-ValidationSuccess {
 
 Write-Host "`nValidating frontend configuration..." -ForegroundColor Cyan
 
-$frontendEnv = Join-Path $projectRoot "frontend" ".env.local"
+$frontendEnv = Join-Path (Join-Path $projectRoot "frontend") ".env.local"
 if (-not (Test-Path $frontendEnv)) {
     $validationErrors += "Missing: frontend/.env.local"
     Write-ValidationError "frontend/.env.local not found"
@@ -74,7 +74,7 @@ if (-not (Test-Path $frontendEnv)) {
 
 Write-Host "`nValidating backend configuration..." -ForegroundColor Cyan
 
-$backendEnv = Join-Path $projectRoot "backend" "WebApp.Api" ".env"
+$backendEnv = Join-Path (Join-Path (Join-Path $projectRoot "backend") "WebApp.Api") ".env"
 if (-not (Test-Path $backendEnv)) {
     $validationErrors += "Missing: backend/WebApp.Api/.env"
     Write-ValidationError "backend/WebApp.Api/.env not found"
