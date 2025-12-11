@@ -23,7 +23,7 @@ This command:
 - **PowerShell 7+** - Cross-platform scripting (https://aka.ms/powershell)
 - **Azure Developer CLI (azd)** - `winget install microsoft.azd`
 - **Bicep CLI** - Installed automatically with `azd`, or manually: `az bicep install`
-- **.NET 9 SDK** - https://dot.net
+- **.NET 10 SDK** - https://dot.net
 - **Node.js 18+** - https://nodejs.org
 - **Azure AI Foundry Resource** - Create at https://ai.azure.com with at least one agent
 - **Docker Desktop** (optional) - For local builds. If not installed, `azd` uses Azure Container Registry cloud build.
@@ -108,7 +108,7 @@ azd env set AI_AGENT_ID <agent-name>
 ## Architecture
 
 **Frontend**: React 18 + TypeScript + Vite  
-**Backend**: ASP.NET Core 9 Minimal APIs  
+**Backend**: ASP.NET Core 10 Minimal APIs  
 **Authentication**: Microsoft Entra ID (PKCE flow)  
 **AI Integration**: Azure AI Foundry Agent Service  
 **Deployment**: Single container, Azure Container Apps  
