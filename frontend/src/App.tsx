@@ -46,7 +46,7 @@ function App() {
         setAgentMetadata(data);
         
         // Update document title with agent name
-        document.title = data.name ? `${data.name} - Azure AI Agent` : 'Azure AI Agent';
+        document.title = data.name ? `${data.name} - Your Legal Companion` : 'Legal AI';
       } catch (error) {
         console.error('Error fetching agent metadata:', error);
         // Fallback data keeps UI functional on error
