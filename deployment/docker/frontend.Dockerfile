@@ -11,7 +11,7 @@ WORKDIR /app/frontend
 COPY frontend/ ./
 
 # Install dependencies (respects .npmrc for custom registries if present)
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Remove ALL local environment files to prevent localhost config from being used
 RUN rm -f .env.local .env.development .env
@@ -26,7 +26,7 @@ ENV VITE_ENTRA_TENANT_ID=$ENTRA_TENANT_ID
 RUN npm run build
 
 # Stage 2: Build .NET API Backend
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS backend-builder
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS backend-builder
 
 WORKDIR /app
 
@@ -45,7 +45,7 @@ COPY backend/ ./backend/
 RUN dotnet publish backend/WebApp.Api/WebApp.Api.csproj -c Release -o /app/publish
 
 # Stage 3: Runtime - .NET API serving both backend and frontend static files
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
 
 WORKDIR /app
 
