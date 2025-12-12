@@ -1,12 +1,15 @@
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsalAuthentication } from "@azure/msal-react";
-import { Spinner } from '@fluentui/react-components';
+import { Spinner, Button } from '@fluentui/react-components';
+import { Navigation24Regular, NavigationUnread24Regular } from '@fluentui/react-icons';
 import { useAppState } from './hooks/useAppState';
 import { InteractionType } from "@azure/msal-browser";
 import { ErrorBoundary } from "./components/core/ErrorBoundary";
 import { AgentPreview } from "./components/AgentPreview";
+import { ChatHistory } from "./components/ChatHistory";
 import { loginRequest } from "./config/authConfig";
 import { useState, useEffect } from "react";
 import { useAuth } from "./hooks/useAuth";
+import { conversationDb } from "./services/conversationDb";
 import type { IAgentMetadata } from "./types/chat";
 import "./App.css";
 
@@ -18,10 +21,16 @@ export interface ChatInterfaceRef {
 function App() {
   // This hook handles authentication automatically - redirects if not authenticated
   useMsalAuthentication(InteractionType.Redirect, loginRequest);
-  const { auth } = useAppState();
+  const { auth, dispatch } = useAppState();
   const { getAccessToken } = useAuth();
   const [agentMetadata, setAgentMetadata] = useState<IAgentMetadata | null>(null);
   const [isLoadingAgent, setIsLoadingAgent] = useState(true);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [isNavVisible, setIsNavVisible] = useState(() => {
+    // Load nav visibility from localStorage (default: true)
+    const stored = localStorage.getItem('chat_nav_visible');
+    return stored !== null ? stored === 'true' : true;
+  });
 
   useEffect(() => {
     const fetchAgentMetadata = async () => {
@@ -30,7 +39,7 @@ function App() {
       try {
         const token = await getAccessToken();
         const apiUrl = import.meta.env.VITE_API_URL || '/api';
-        
+
         const response = await fetch(`${apiUrl}/agent`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -44,7 +53,7 @@ function App() {
 
         const data = await response.json();
         setAgentMetadata(data);
-        
+
         // Update document title with agent name
         document.title = data.name ? `${data.name} - Your Legal Companion` : 'Legal AI';
       } catch (error) {
@@ -68,16 +77,65 @@ function App() {
     fetchAgentMetadata();
   }, [auth.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Persist nav visibility to localStorage
+  useEffect(() => {
+    localStorage.setItem('chat_nav_visible', String(isNavVisible));
+  }, [isNavVisible]);
+
+  // Initialize IndexedDB and migrate data on mount
+  useEffect(() => {
+    const initDb = async () => {
+      try {
+        await conversationDb.init();
+        await conversationDb.migrateFromLocalStorage();
+      } catch (error) {
+        console.error('Failed to initialize IndexedDB:', error);
+      }
+    };
+    initDb();
+  }, []);
+
+
+
+  // Sync localStorage (updated by reducer) to IndexedDB
+  useEffect(() => {
+    const syncHandler = async () => {
+      try {
+        const stored = localStorage.getItem('chat_conversations');
+        if (stored) {
+          const conversations = JSON.parse(stored);
+          // Sync all to IndexedDB
+          for (const conv of conversations) {
+            await conversationDb.saveConversation(conv);
+          }
+          // Notify components to reload
+          window.dispatchEvent(new CustomEvent('indexeddb_conversations_updated'));
+        }
+      } catch (error) {
+        console.error('Failed to sync conversations:', error);
+      }
+    };
+
+    window.addEventListener('chat_conversations_updated', syncHandler as EventListener);
+
+    // Initial sync on mount to catch any missed updates
+    syncHandler();
+
+    return () => {
+      window.removeEventListener('chat_conversations_updated', syncHandler as EventListener);
+    };
+  }, []);
+
   return (
     <ErrorBoundary>
       {auth.status === 'initializing' || isLoadingAgent ? (
-        <div className="app-container" style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          height: '100vh', 
-          flexDirection: 'column', 
-          gap: '1rem' 
+        <div className="app-container" style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+          flexDirection: 'column',
+          gap: '1rem'
         }}>
           <Spinner size="large" />
           <p style={{ margin: 0 }}>
@@ -88,21 +146,64 @@ function App() {
         <>
           <AuthenticatedTemplate>
             {agentMetadata && (
-              <div className="app-container">
-                <AgentPreview 
-                  agentId={agentMetadata.id}
-                  agentName={agentMetadata.name}
-                  agentDescription={agentMetadata.description || undefined}
-                  agentLogo={agentMetadata.metadata?.logo}
+              <div className="app-layout">
+                <ChatHistory
+                  isVisible={isNavVisible}
+                  onSelectConversation={(id) => {
+                    setSelectedConversationId(id);
+                    // Load messages from localStorage
+                    const conversations = JSON.parse(localStorage.getItem('chat_conversations') || '[]');
+                    const conversation = conversations.find((c: any) => c.id === id);
+                    if (conversation && conversation.messages) {
+                      // Clear current state
+                      dispatch({ type: 'CHAT_CLEAR' });
+                      // Restore each message (without affecting status)
+                      conversation.messages.forEach((msg: any) => {
+                        dispatch({ type: 'CHAT_RESTORE_MESSAGE', message: msg });
+                      });
+                      // Restore the conversation state (sets currentConversationId and unlocks input)
+                      dispatch({
+                        type: 'CHAT_RESTORE_CONVERSATION',
+                        conversationId: id,
+                      });
+                    }
+                  }}
+                  onNewChat={() => {
+                    setSelectedConversationId(null);
+                    dispatch({ type: 'CHAT_CLEAR' });
+                  }}
+                  currentConversationId={selectedConversationId}
                 />
+                <div className="app-main">
+                  <Button
+                    icon={isNavVisible ? <NavigationUnread24Regular /> : <Navigation24Regular />}
+                    appearance="subtle"
+                    onClick={() => setIsNavVisible(!isNavVisible)}
+                    title={isNavVisible ? "Hide chat history" : "Show chat history"}
+                    aria-label={isNavVisible ? "Hide chat history" : "Show chat history"}
+                    style={{
+                      position: 'absolute',
+                      top: '16px',
+                      left: '16px',
+                      zIndex: 10,
+                    }}
+                  />
+                  <AgentPreview
+                    agentId={agentMetadata.id}
+                    agentName={agentMetadata.name}
+                    agentDescription={agentMetadata.description || undefined}
+                    agentLogo={agentMetadata.metadata?.logo}
+                    conversationId={selectedConversationId}
+                  />
+                </div>
               </div>
             )}
           </AuthenticatedTemplate>
           <UnauthenticatedTemplate>
-            <div className="app-container" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
+            <div className="app-container" style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               height: '100vh'
             }}>
               <p>Signing in...</p>

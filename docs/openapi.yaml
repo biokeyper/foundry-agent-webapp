@@ -1,0 +1,72 @@
+openapi: 3.0.3
+info:
+  title: AI Agent WebApp API (minimal)
+  version: 0.1.0
+servers:
+  - url: /api
+paths:
+  /agent:
+    get:
+      summary: Get agent metadata
+      responses:
+        '200':
+          description: Agent metadata
+  /agent/info:
+    get:
+      summary: Get agent debug info
+      responses:
+        '200':
+          description: Agent info
+  /chat/stream:
+    post:
+      summary: Stream chat response (SSE)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                conversationId:
+                  type: string
+                imageDataUris:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Server-Sent Events stream (see SSE schema)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /conversations:
+    get:
+      summary: List recent conversation metadata
+      responses:
+        '200':
+          description: Array of conversation metadata
+  /conversations/{id}:
+    get:
+      summary: Get metadata for a single conversation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation metadata
+components:
+  schemas:
+    SseEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [conversationId, chunk, usage, done, error]
+        data:
+          type: object
