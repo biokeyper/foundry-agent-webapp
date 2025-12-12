@@ -350,6 +350,19 @@ app.MapGet("/api/agent/info", async (
 .RequireAuthorization(ScopePolicyName)
 .WithName("GetAgentInfo");
 
+// Note: Conversation listing/retrieval endpoints commented out pending Azure SDK API availability
+// The Azure.AI.Projects SDK does not currently expose ListProjectConversationsAsync or GetProjectConversationAsync
+// These would be implemented once the SDK supports conversation enumeration.
+// Placeholder endpoints below document the intended contract.
+
+// List conversations (conversation metadata) - PLACEHOLDER
+// GET /api/conversations
+// Intended to return: [ { id: string, title?: string, createdAt: DateTime } ]
+
+// Get conversation metadata - PLACEHOLDER
+// GET /api/conversations/{id}
+// Intended to return: { id: string, title?: string, createdAt: DateTime, metadata?: dict }
+
 // Fallback route for SPA - serve index.html for any non-API routes
 app.MapFallbackToFile("index.html");
 

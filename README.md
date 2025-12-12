@@ -17,6 +17,13 @@ This command:
 **Local Development**: http://localhost:5173 (frontend), http://localhost:8080 (backend)  
 **Production**: https://<your-app>.azurecontainerapps.io
 
+## Key Features
+- **AI Agent Chat**: Real-time streaming chat with Azure AI Foundry agents
+- **Persistent History**: Chat history saved locally via IndexedDB (offline capable)
+- **Searchable Conversations**: Real-time filtered search for past chats
+- **Secure**: Microsoft Entra ID authentication and RBAC-based access
+- **Responsive Design**: Mobile-friendly layout with toggleable navigation
+
 ## Prerequisites
 
 - **Azure Subscription** with Contributor role

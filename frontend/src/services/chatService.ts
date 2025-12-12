@@ -211,6 +211,7 @@ export class ChatService {
         type: 'CHAT_START_STREAM',
         conversationId: currentConversationId || undefined,
         messageId: assistantMessageId,
+        userMessage: messageText,
       });
 
       this.currentStreamAbort = new AbortController();
@@ -234,7 +235,7 @@ export class ChatService {
         1000
       );
 
-      await this.processStream(response, assistantMessageId, currentConversationId);
+      await this.processStream(response, assistantMessageId, currentConversationId, messageText);
       this.currentStreamAbort = undefined;
       this.streamCancelled = false;
     } catch (error) {
@@ -278,7 +279,8 @@ export class ChatService {
   private async processStream(
     response: Response,
     messageId: string,
-    currentConversationId: string | null
+    currentConversationId: string | null,
+    initialUserMessage?: string
   ): Promise<void> {
     const reader = response.body?.getReader();
     const decoder = new TextDecoder();
@@ -329,10 +331,18 @@ export class ChatService {
             case 'conversationId':
               if (!newConversationId) {
                 newConversationId = event.data.conversationId;
+                // Inform reducer/other listeners that conversationId has been assigned
                 this.dispatch({
                   type: 'CHAT_START_STREAM',
                   conversationId: event.data.conversationId,
                   messageId,
+                });
+
+                // Dispatch an explicit assign action so reducer can persist and set title if missing
+                this.dispatch({
+                  type: 'CHAT_ASSIGN_CONVERSATION',
+                  conversationId: event.data.conversationId,
+                  title: initialUserMessage ? initialUserMessage.substring(0, 100) : undefined,
                 });
               }
               break;

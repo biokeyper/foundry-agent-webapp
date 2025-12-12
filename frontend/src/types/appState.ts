@@ -36,21 +36,24 @@ export interface AppState {
  * All possible actions that can modify application state
  * Use discriminated unions for type safety
  */
-export type AppAction = 
+export type AppAction =
   // Auth actions
   | { type: 'AUTH_INITIALIZED'; user: AccountInfo }
   | { type: 'AUTH_TOKEN_EXPIRED' }
-  
+
   // Chat actions
   | { type: 'CHAT_SEND_MESSAGE'; message: IChatItem }
-  | { type: 'CHAT_START_STREAM'; conversationId?: string; messageId: string }
+  | { type: 'CHAT_START_STREAM'; conversationId?: string; messageId: string; userMessage?: string }
   | { type: 'CHAT_STREAM_CHUNK'; messageId: string; content: string }
   | { type: 'CHAT_STREAM_COMPLETE'; usage: IUsageInfo }
   | { type: 'CHAT_CANCEL_STREAM' }
   | { type: 'CHAT_ERROR'; error: AppError } // Enhanced error object
   | { type: 'CHAT_CLEAR_ERROR' } // Clear error state
   | { type: 'CHAT_CLEAR' }
-  | { type: 'CHAT_ADD_ASSISTANT_MESSAGE'; messageId: string };
+  | { type: 'CHAT_ADD_ASSISTANT_MESSAGE'; messageId: string }
+  | { type: 'CHAT_RESTORE_CONVERSATION'; conversationId: string }
+  | { type: 'CHAT_ASSIGN_CONVERSATION'; conversationId: string; title?: string }
+  | { type: 'CHAT_RESTORE_MESSAGE'; message: IChatItem };
 
 /**
  * Initial state for the application
