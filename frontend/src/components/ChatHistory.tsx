@@ -172,7 +172,7 @@ export function ChatHistory({
           contentBefore={<Search24Regular />}
           placeholder="Search conversations..."
           value={searchQuery}
-          onChange={(e, data) => setSearchQuery(data.value)}
+          onChange={(_e, data) => setSearchQuery(data.value)}
           className={styles.searchInput}
           aria-label="Search conversations"
         />

@@ -16,7 +16,7 @@ interface AgentPreviewProps {
   conversationId?: string | null;
 }
 
-export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDescription, agentLogo, conversationId }) => {
+export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDescription, agentLogo }) => {
   const { chat } = useAppState();
   const { dispatch } = useAppContext();
   const { getAccessToken } = useAuth();
@@ -24,7 +24,7 @@ export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDesc
 
   // Create service instances
   const apiUrl = import.meta.env.VITE_API_URL || '/api';
-  
+
   const chatService = useMemo(() => {
     return new ChatService(apiUrl, getAccessToken, dispatch);
   }, [apiUrl, getAccessToken, dispatch]);
@@ -48,7 +48,7 @@ export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDesc
   return (
     <div className={styles.content}>
       <div className={styles.mainContent}>
-        <ChatInterface 
+        <ChatInterface
           messages={chat.messages}
           status={chat.status}
           error={chat.error}
@@ -64,10 +64,10 @@ export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDesc
           agentDescription={agentDescription}
           agentLogo={agentLogo}
         />
-        
+
         <BuiltWithBadge className={styles.builtWithBadge} />
       </div>
-      
+
       <SettingsPanel
         isOpen={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
