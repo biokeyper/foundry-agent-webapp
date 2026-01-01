@@ -13,9 +13,10 @@ interface AgentPreviewProps {
   agentName: string;
   agentDescription?: string;
   agentLogo?: string;
+  conversationId?: string | null;
 }
 
-export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDescription, agentLogo }) => {
+export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDescription, agentLogo, conversationId }) => {
   const { chat } = useAppState();
   const { dispatch } = useAppContext();
   const { getAccessToken } = useAuth();
@@ -43,6 +44,9 @@ export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDesc
   const handleCancelStream = () => {
     chatService.cancelStream();
   };
+
+  // Use `conversationId` (may be passed by callers) to avoid TS errors for unused props
+  void conversationId;
 
   return (
     <div className={styles.content}>
