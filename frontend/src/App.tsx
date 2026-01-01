@@ -108,6 +108,20 @@ function App() {
           for (const conv of conversations) {
             await conversationDb.saveConversation(conv);
           }
+
+          // Cleanup: remove any orphaned conversations from IndexedDB
+          try {
+            const existing = await conversationDb.getAllConversations();
+            const keepIds = new Set(conversations.map((c: any) => c.id));
+            for (const ex of existing) {
+              if (!keepIds.has(ex.id)) {
+                await conversationDb.deleteConversation(ex.id);
+              }
+            }
+          } catch (cleanupError) {
+            console.error('Failed to cleanup IndexedDB conversations:', cleanupError);
+          }
+
           // Notify components to reload
           window.dispatchEvent(new CustomEvent('indexeddb_conversations_updated'));
         }
