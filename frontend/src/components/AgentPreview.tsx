@@ -13,10 +13,9 @@ interface AgentPreviewProps {
   agentName: string;
   agentDescription?: string;
   agentLogo?: string;
-  conversationId?: string | null;
 }
 
-export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDescription, agentLogo, conversationId }) => {
+export const AgentPreview: React.FC<AgentPreviewProps> = ({ agentName, agentDescription, agentLogo }) => {
   const { chat } = useAppState();
   const { dispatch } = useAppContext();
   const { getAccessToken } = useAuth();
